@@ -1,0 +1,197 @@
+---
+title: "DATA MINING COURSE"
+author: "TEYI KODJO JEROME SEDOWO"
+date: "`r Sys.Date()`"
+output: word_document
+---
+
+# Package
+
+**Here, we'll use FactoMineR for the analysis and factoextra for ggplot2-based visualization**
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+library(FactoMineR)
+library(factoextra)
+library(readr)
+library(corrplot)
+```
+
+
+# Import the data set
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+data <- read_delim("C:/Users/Jérôme/Desktop/TEYI_KODJO_JEROME_SEDOWO/ETUDE/AIMS_SENEGAL_2024-2025/Review phase Courses/Block 4/Data Mining and Big data/Tutorial_1/ACP_eaux.txt", 
+    delim = "\t", escape_double = FALSE, 
+    col_types = cols(CA = col_number(), MG = col_number(), 
+        `NA` = col_number(), K = col_number(), 
+        SUL = col_number(), NO3 = col_number(), 
+        HCO3 = col_number(), CL = col_number()), 
+    trim_ws = TRUE)
+#View(data)
+```
+
+
+
+```{r echo=TRUE}
+data_numeric <- data[6:13]
+head(data_numeric)
+```
+
+# Exploratory analysis
+
+Here we print a simple statistics for continous variables
+
+```{r echo=TRUE}
+summary(data_numeric)
+```
+
+```{r echo=TRUE}
+cor(data_numeric)
+```
+
+
+
+# Data Standardization
+
+By default PCA() in **FactoMinR** standardizes the data automatically during the PCA. So we will not standardize the data manually before the PCA
+
+```{r echo=TRUE}
+resul_pca <- PCA(data_numeric, graph = FALSE)
+print(resul_pca)
+```
+
+
+*This is many information found in many different lists and matrices.*
+
+
+# Visualization and Interpretation
+
+### Eigenvalues
+
+```{r}
+eig_value <- get_eigenvalue(resul_pca)
+eig_value
+```
+
+### Visualisation and Interpretation
+
+```{r}
+fviz_eig(resul_pca, addlabels = TRUE, ylim = c(0,50))
+```
+
+From yhe plot above, we might want to stop at the third principal component. 68% of the information contained in the data are retained by the first Three principal components.
+
+## Graph of variables 
+
+```{r}
+var <- get_pca_var(resul_pca)
+var
+```
+
+### Coordinates of variables
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+var$coord
+```
+
+## Contribution of the variables
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+var$contrib
+```
+## Contribution of Variables to PC1
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+fviz_contrib(resul_pca, choice = "var", axes = 1)
+```
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+fviz_contrib(resul_pca, choice = "var", axes = 2)
+```
+
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+fviz_contrib(resul_pca, choice = "var", axes = 3)
+```
+
+
+
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+fviz_pca_var(resul_pca, col.var = "contrib",
+             gradient.cols = c("#00AFBB","#E7B800","#FC4E07"),
+             repel = TRUE)
+```
+
+
+
+
+
+### Correlation circle
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+fviz_pca_var(resul_pca, col.var = "cos2",
+             gradient.cols = c("#00AFBB","#E7B800","#FC4E07"),
+             repel = TRUE)
+```
+
+
+## Quality of representation
+
+```{r}
+corrplot(var$cos2, is.corr = FALSE)
+```
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+fviz_cos2(resul_pca, choice = "var", axes = 1:2)
+```
+
+
+## Dimension description 
+
+*Description of dimension 1*
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+res.desc <- dimdesc(resul_pca, axes = c(1,2), proba = 0.05)
+res.desc$Dim.1
+```
+*Description of dimension 2*
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+res.desc <- dimdesc(resul_pca, axes = c(1,2), proba = 0.05)
+res.desc$Dim.2
+```
+# Graph of individuals 
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+
+ind <- get_pca_ind(resul_pca)
+ind
+```
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+
+# ind$coord
+# ind$cos2
+# ind$contrib
+
+```
+
+
+# Quality of contribution
+
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+fviz_pca_ind(resul_pca, col.ind = "cos2",
+             gradient.cols = c("#00AFBB","#E7B800","#FC4E07"),
+             repel = TRUE)
+```
+
+
+```{r echo=TRUE, message=FALSE, warning=FALSE, paged.print=FALSE}
+
+fviz_pca_ind(resul_pca, pointsize = "cos2",
+             pointshape = 21, fill = "#E7B800",
+             repel = TRUE)
+```
+
+
